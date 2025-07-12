@@ -1,17 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscaminas</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <div class="container">
-    <h1>💣 Buscaminas</h1>
-    <button id="reset">🔄 Reiniciar</button>
-    <div id="game"></div>
-  </div>
-  <script src="js/game.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buscaminas</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>💣 Buscaminas</h1>
+
+      <div class="top-bar">
+        <select id="difficulty">
+          <option value="easy">Fácil (8x8)</option>
+          <option value="medium" selected>Medio (10x10)</option>
+          <option value="hard">Difícil (14x14)</option>
+        </select>
+        <button id="reset">🔄 Reiniciar</button>
+        <span id="flags">🚩 0</span>
+        <span id="timer">⏱ 00:00</span>
+      </div>
+
+      <div id="game"></div>
+    </div>
+
+   
+  <footer class="footer">
+    <p>&copy; 2025 alexgrt1. Todos los derechos reservados.</p>
+  </footer>
+  
+    <script src="js/game.js"></script>
+  </body>
 </html>
