@@ -12,6 +12,7 @@ let timer;
 let seconds = 0;
 let gameStarted = false;
 let flagsRemaining = bombsCount;
+let firstClick = true;
 
 // Sonidos
 const clickSound = new Audio("assets/click.wav");
@@ -62,6 +63,7 @@ function createBoard() {
     gameStarted = false;
     flagsRemaining = bombsCount;
     updateFlagCounter();
+    firstClick = true;
 
 
     for (let i = 0; i < rows * cols; i++) {
@@ -74,20 +76,7 @@ function createBoard() {
         cells.push(cell);
     }
 
-    const bombPositions = new Set();
-    while (bombPositions.size < bombsCount) {
-        bombPositions.add(Math.floor(Math.random() * rows * cols));
-    }
-    bombPositions.forEach(i => (cells[i].dataset.bomb = "true"));
-
-    cells.forEach((cell, i) => {
-        if (cell.dataset.bomb === "true") return;
-        const neighbors = getNeighbors(i);
-        const count = neighbors.filter(n => n.dataset.bomb === "true").length;
-        if (count > 0) {
-            cell.dataset.count = count;
-        }
-    });
+    
 }
 
 function getNeighbors(index) {
@@ -110,35 +99,52 @@ function getNeighbors(index) {
 }
 
 function handleClick(e) {
-    const cell = e.target;
-    if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
+  const cell = e.target;
+  if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
 
-    if (!gameStarted) {
-        gameStarted = true;
-        startTimer();
+  if (firstClick) {
+    firstClick = false;
+    generateBombsExcluding(parseInt(cell.dataset.index));
+    startTimer();
+  }
 
-        if (cell.dataset.bomb === "true") {
-            boomSound.play();
-            cell.classList.add("bomb");
-            cell.textContent = "💣";
-            revealAll();
-            alert("💥 ¡BOOM! Has perdido.");
-            stopTimer();
-            return;
-        }
+  if (cell.dataset.bomb === "true") {
+    boomSound.play();
+    cell.classList.add("bomb");
+    cell.textContent = "💣";
+    revealAll();
+    alert("💥 ¡BOOM! Has perdido.");
+    stopTimer();
+    return;
+  }
+
+  clickSound.play();
+  reveal(cell);
+}
+
+function generateBombsExcluding(startIndex) {
+  const excluded = new Set();
+  excluded.add(startIndex);
+  getNeighbors(startIndex).forEach(n => excluded.add(parseInt(n.dataset.index)));
+
+  const bombPositions = new Set();
+  while (bombPositions.size < bombsCount) {
+    const rand = Math.floor(Math.random() * rows * cols);
+    if (excluded.has(rand)) continue;
+    bombPositions.add(rand);
+  }
+
+  bombPositions.forEach(i => (cells[i].dataset.bomb = "true"));
+
+  // Calcula los números
+  cells.forEach((cell, i) => {
+    if (cell.dataset.bomb === "true") return;
+    const neighbors = getNeighbors(i);
+    const count = neighbors.filter(n => n.dataset.bomb === "true").length;
+    if (count > 0) {
+      cell.dataset.count = count;
     }
-
-    if (cell.dataset.bomb === "true") {
-        boomSound.play();
-        cell.classList.add("bomb");
-        revealAll();
-        alert("💥 ¡BOOM! Has perdido.");
-        stopTimer();
-        return;
-    }
-
-    clickSound.play();
-    reveal(cell);
+  });
 }
 
 function handleRightClick(e) {
