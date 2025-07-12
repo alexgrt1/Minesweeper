@@ -115,6 +115,10 @@ h1 {
   }
 }
 
+.cell {
+  font-size: 22px;
+  line-height: 1;
+}
 
 .cell[data-count="1"] { color: #3498db; }
 .cell[data-count="2"] { color: #27ae60; }
