@@ -80,6 +80,42 @@ h1 {
   color: black;
 }
 
+.top-bar {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#difficulty {
+  padding: 6px 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#timer {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.cell.revealed {
+  animation: reveal 0.15s ease-in-out;
+}
+
+@keyframes reveal {
+  from {
+    transform: scale(1.15);
+    background-color: #ddd;
+  }
+  to {
+    transform: scale(1);
+    background-color: #f0f0f0;
+  }
+}
+
+
 .cell[data-count="1"] { color: #3498db; }
 .cell[data-count="2"] { color: #27ae60; }
 .cell[data-count="3"] { color: #e67e22; }
