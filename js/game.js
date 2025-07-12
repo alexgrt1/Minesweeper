@@ -12,9 +12,9 @@ let seconds = 0;
 let gameStarted = false;
 
 // Sonidos
-const clickSound = new Audio("assets/click.mp3");
-const flagSound = new Audio("assets/flag.mp3");
-const boomSound = new Audio("assets/boom.mp3");
+const clickSound = new Audio("assets/click.wav");
+const flagSound = new Audio("assets/flag.wav");
+const boomSound = new Audio("assets/boom.wav");
 
 function updateDifficulty() {
   const level = difficultySelect.value;
