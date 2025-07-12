@@ -17,155 +17,174 @@ const flagSound = new Audio("assets/flag.wav");
 const boomSound = new Audio("assets/boom.wav");
 
 function updateDifficulty() {
-  const level = difficultySelect.value;
-  if (level === "easy") {
-    rows = cols = 8;
-    bombsCount = 10;
-  } else if (level === "medium") {
-    rows = cols = 10;
-    bombsCount = 15;
-  } else if (level === "hard") {
-    rows = cols = 14;
-    bombsCount = 30;
-  }
+    const level = difficultySelect.value;
+    if (level === "easy") {
+        rows = cols = 8;
+        bombsCount = 10;
+    } else if (level === "medium") {
+        rows = cols = 10;
+        bombsCount = 15;
+    } else if (level === "hard") {
+        rows = cols = 14;
+        bombsCount = 30;
+    }
 
-  game.style.gridTemplateColumns = `repeat(${cols}, 34px)`;
+    game.style.gridTemplateColumns = `repeat(${cols}, 34px)`;
 }
 
 function startTimer() {
-  clearInterval(timer);
-  seconds = 0;
-  timerEl.textContent = "⏱ 00:00";
-  timer = setInterval(() => {
-    seconds++;
-    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const s = String(seconds % 60).padStart(2, '0');
-    timerEl.textContent = `⏱ ${m}:${s}`;
-  }, 1000);
+    clearInterval(timer);
+    seconds = 0;
+    timerEl.textContent = "⏱ 00:00";
+    timer = setInterval(() => {
+        seconds++;
+        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const s = String(seconds % 60).padStart(2, '0');
+        timerEl.textContent = `⏱ ${m}:${s}`;
+    }, 1000);
 }
 
 function stopTimer() {
-  clearInterval(timer);
+    clearInterval(timer);
 }
 
 function createBoard() {
-  updateDifficulty();
-  game.innerHTML = "";
-  cells = [];
-  stopTimer();
-  gameStarted = false;
+    updateDifficulty();
+    game.innerHTML = "";
+    cells = [];
+    stopTimer();
+    gameStarted = false;
 
-  for (let i = 0; i < rows * cols; i++) {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-    cell.dataset.index = i;
-    cell.addEventListener("click", handleClick);
-    cell.addEventListener("contextmenu", handleRightClick);
-    game.appendChild(cell);
-    cells.push(cell);
-  }
-
-  const bombPositions = new Set();
-  while (bombPositions.size < bombsCount) {
-    bombPositions.add(Math.floor(Math.random() * rows * cols));
-  }
-  bombPositions.forEach(i => (cells[i].dataset.bomb = "true"));
-
-  cells.forEach((cell, i) => {
-    if (cell.dataset.bomb === "true") return;
-    const neighbors = getNeighbors(i);
-    const count = neighbors.filter(n => n.dataset.bomb === "true").length;
-    if (count > 0) {
-      cell.dataset.count = count;
+    for (let i = 0; i < rows * cols; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = i;
+        cell.addEventListener("click", handleClick);
+        cell.addEventListener("contextmenu", handleRightClick);
+        game.appendChild(cell);
+        cells.push(cell);
     }
-  });
+
+    const bombPositions = new Set();
+    while (bombPositions.size < bombsCount) {
+        bombPositions.add(Math.floor(Math.random() * rows * cols));
+    }
+    bombPositions.forEach(i => (cells[i].dataset.bomb = "true"));
+
+    cells.forEach((cell, i) => {
+        if (cell.dataset.bomb === "true") return;
+        const neighbors = getNeighbors(i);
+        const count = neighbors.filter(n => n.dataset.bomb === "true").length;
+        if (count > 0) {
+            cell.dataset.count = count;
+        }
+    });
 }
 
 function getNeighbors(index) {
-  const neighbors = [];
-  const row = Math.floor(index / cols);
-  const col = index % cols;
+    const neighbors = [];
+    const row = Math.floor(index / cols);
+    const col = index % cols;
 
-  for (let r = -1; r <= 1; r++) {
-    for (let c = -1; c <= 1; c++) {
-      if (r === 0 && c === 0) continue;
-      const newRow = row + r;
-      const newCol = col + c;
-      if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
-        neighbors.push(cells[newRow * cols + newCol]);
-      }
+    for (let r = -1; r <= 1; r++) {
+        for (let c = -1; c <= 1; c++) {
+            if (r === 0 && c === 0) continue;
+            const newRow = row + r;
+            const newCol = col + c;
+            if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+                neighbors.push(cells[newRow * cols + newCol]);
+            }
+        }
     }
-  }
 
-  return neighbors;
+    return neighbors;
 }
 
 function handleClick(e) {
-  const cell = e.target;
-  if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
+    const cell = e.target;
+    if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
 
-  if (!gameStarted) {
-    gameStarted = true;
-    startTimer();
-  }
+    if (!gameStarted) {
+        gameStarted = true;
+        startTimer();
 
-  if (cell.dataset.bomb === "true") {
-    boomSound.play();
-    cell.classList.add("bomb");
-    revealAll();
-    alert("💥 ¡BOOM! Has perdido.");
-    stopTimer();
-    return;
-  }
+        if (cell.dataset.bomb === "true") {
+            boomSound.play();
+            cell.classList.add("bomb");
+            cell.textContent = "💣";
+            revealAll();
+            alert("💥 ¡BOOM! Has perdido.");
+            stopTimer();
+            return;
+        }
+    }
 
-  clickSound.play();
-  reveal(cell);
+    if (cell.dataset.bomb === "true") {
+        boomSound.play();
+        cell.classList.add("bomb");
+        revealAll();
+        alert("💥 ¡BOOM! Has perdido.");
+        stopTimer();
+        return;
+    }
+
+    clickSound.play();
+    reveal(cell);
 }
 
 function handleRightClick(e) {
-  e.preventDefault();
-  const cell = e.target;
-  if (cell.classList.contains("revealed")) return;
-  cell.classList.toggle("flag");
-  flagSound.play();
+    e.preventDefault();
+    const cell = e.target;
+    if (cell.classList.contains("revealed")) return;
+
+    if (cell.classList.contains("flag")) {
+        cell.classList.remove("flag");
+        cell.textContent = "";
+    } else {
+        cell.classList.add("flag");
+        cell.textContent = "🚩";
+        flagSound.play();
+    }
 }
 
+
 function reveal(cell) {
-  if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
+    if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
 
-  cell.classList.add("revealed");
+    cell.classList.add("revealed");
 
-  if (cell.dataset.count) {
-    cell.textContent = cell.dataset.count;
-  } else {
-    const neighbors = getNeighbors(parseInt(cell.dataset.index));
-    neighbors.forEach(reveal);
-  }
+    if (cell.dataset.count) {
+        cell.textContent = cell.dataset.count;
+    } else {
+        const neighbors = getNeighbors(parseInt(cell.dataset.index));
+        neighbors.forEach(reveal);
+    }
 
-  // Victoria
-  if (checkWin()) {
-    alert("🎉 ¡Felicidades! Has ganado.");
-    stopTimer();
-    revealAll();
-  }
+    // Victoria
+    if (checkWin()) {
+        alert("🎉 ¡Felicidades! Has ganado.");
+        stopTimer();
+        revealAll();
+    }
 }
 
 function revealAll() {
-  cells.forEach(cell => {
-    if (cell.dataset.bomb === "true") {
-      cell.classList.add("bomb");
-    } else if (cell.dataset.count) {
-      cell.textContent = cell.dataset.count;
-    }
-    cell.classList.add("revealed");
-  });
+    cells.forEach(cell => {
+        if (cell.dataset.bomb === "true") {
+            cell.classList.add("bomb");
+            cell.textContent = "💣";
+        } else if (cell.dataset.count) {
+            cell.textContent = cell.dataset.count;
+        }
+        cell.classList.add("revealed");
+    });
 }
 
 function checkWin() {
-  return cells.filter(cell =>
-    !cell.classList.contains("revealed") &&
-    cell.dataset.bomb !== "true"
-  ).length === 0;
+    return cells.filter(cell =>
+        !cell.classList.contains("revealed") &&
+        cell.dataset.bomb !== "true"
+    ).length === 0;
 }
 
 // Listeners
