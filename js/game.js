@@ -76,7 +76,7 @@ function createBoard() {
         cells.push(cell);
     }
 
-    
+
 }
 
 function getNeighbors(index) {
@@ -99,52 +99,58 @@ function getNeighbors(index) {
 }
 
 function handleClick(e) {
-  const cell = e.target;
-  if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
+    const cell = e.target;
+    if (cell.classList.contains("flag")) return;
 
-  if (firstClick) {
-    firstClick = false;
-    generateBombsExcluding(parseInt(cell.dataset.index));
-    startTimer();
-  }
+    if (cell.classList.contains("revealed")) {
+        attemptAutoReveal(cell);
+        return;
+    }
 
-  if (cell.dataset.bomb === "true") {
-    boomSound.play();
-    cell.classList.add("bomb");
-    cell.textContent = "💣";
-    revealAll();
-    alert("💥 ¡BOOM! Has perdido.");
-    stopTimer();
-    return;
-  }
 
-  clickSound.play();
-  reveal(cell);
+    if (firstClick) {
+        firstClick = false;
+        generateBombsExcluding(parseInt(cell.dataset.index));
+        startTimer();
+    }
+
+    if (cell.dataset.bomb === "true") {
+        boomSound.play();
+        cell.classList.add("bomb");
+        cell.textContent = "💣";
+        revealAll();
+        alert("💥 ¡BOOM! Has perdido.");
+        stopTimer();
+        return;
+    }
+
+    clickSound.play();
+    reveal(cell);
 }
 
 function generateBombsExcluding(startIndex) {
-  const excluded = new Set();
-  excluded.add(startIndex);
-  getNeighbors(startIndex).forEach(n => excluded.add(parseInt(n.dataset.index)));
+    const excluded = new Set();
+    excluded.add(startIndex);
+    getNeighbors(startIndex).forEach(n => excluded.add(parseInt(n.dataset.index)));
 
-  const bombPositions = new Set();
-  while (bombPositions.size < bombsCount) {
-    const rand = Math.floor(Math.random() * rows * cols);
-    if (excluded.has(rand)) continue;
-    bombPositions.add(rand);
-  }
-
-  bombPositions.forEach(i => (cells[i].dataset.bomb = "true"));
-
-  // Calcula los números
-  cells.forEach((cell, i) => {
-    if (cell.dataset.bomb === "true") return;
-    const neighbors = getNeighbors(i);
-    const count = neighbors.filter(n => n.dataset.bomb === "true").length;
-    if (count > 0) {
-      cell.dataset.count = count;
+    const bombPositions = new Set();
+    while (bombPositions.size < bombsCount) {
+        const rand = Math.floor(Math.random() * rows * cols);
+        if (excluded.has(rand)) continue;
+        bombPositions.add(rand);
     }
-  });
+
+    bombPositions.forEach(i => (cells[i].dataset.bomb = "true"));
+
+    // Calcula los números
+    cells.forEach((cell, i) => {
+        if (cell.dataset.bomb === "true") return;
+        const neighbors = getNeighbors(i);
+        const count = neighbors.filter(n => n.dataset.bomb === "true").length;
+        if (count > 0) {
+            cell.dataset.count = count;
+        }
+    });
 }
 
 function handleRightClick(e) {
@@ -166,8 +172,6 @@ function handleRightClick(e) {
 
     updateFlagCounter();
 }
-
-
 
 function reveal(cell) {
     if (cell.classList.contains("revealed") || cell.classList.contains("flag")) return;
@@ -206,6 +210,19 @@ function checkWin() {
         !cell.classList.contains("revealed") &&
         cell.dataset.bomb !== "true"
     ).length === 0;
+}
+
+function attemptAutoReveal(cell) {
+    const index = parseInt(cell.dataset.index);
+    const neighbors = getNeighbors(index);
+
+    const flagged = neighbors.filter(n => n.classList.contains("flag"));
+    const unrevealed = neighbors.filter(n => !n.classList.contains("revealed") && !n.classList.contains("flag"));
+
+    const expectedCount = parseInt(cell.dataset.count);
+    if (!expectedCount || flagged.length !== expectedCount) return;
+
+    unrevealed.forEach(n => handleClick({ target: n }));
 }
 
 // Listeners
