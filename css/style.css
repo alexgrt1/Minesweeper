@@ -115,6 +115,11 @@ h1 {
   }
 }
 
+#flags {
+  font-size: 18px;
+  font-weight: bold;
+}
+
 .cell {
   font-size: 22px;
   line-height: 1;

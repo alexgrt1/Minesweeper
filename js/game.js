@@ -2,6 +2,7 @@ const game = document.getElementById("game");
 const resetBtn = document.getElementById("reset");
 const timerEl = document.getElementById("timer");
 const difficultySelect = document.getElementById("difficulty");
+const flagsEl = document.getElementById("flags");
 
 let rows = 10;
 let cols = 10;
@@ -10,6 +11,7 @@ let cells = [];
 let timer;
 let seconds = 0;
 let gameStarted = false;
+let flagsRemaining = bombsCount;
 
 // Sonidos
 const clickSound = new Audio("assets/click.wav");
@@ -48,12 +50,19 @@ function stopTimer() {
     clearInterval(timer);
 }
 
+function updateFlagCounter() {
+    flagsEl.textContent = `🚩 ${flagsRemaining}`;
+}
+
 function createBoard() {
     updateDifficulty();
     game.innerHTML = "";
     cells = [];
     stopTimer();
     gameStarted = false;
+    flagsRemaining = bombsCount;
+    updateFlagCounter();
+
 
     for (let i = 0; i < rows * cols; i++) {
         const cell = document.createElement("div");
@@ -140,12 +149,18 @@ function handleRightClick(e) {
     if (cell.classList.contains("flag")) {
         cell.classList.remove("flag");
         cell.textContent = "";
+        flagsRemaining++;
     } else {
+        if (flagsRemaining <= 0) return; // no más banderas
         cell.classList.add("flag");
         cell.textContent = "🚩";
+        flagsRemaining--;
         flagSound.play();
     }
+
+    updateFlagCounter();
 }
+
 
 
 function reveal(cell) {
